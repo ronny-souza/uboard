@@ -23,3 +23,5 @@ spring:
         persistence:
           validation:
             mode: none
+
+gitlab-provider: ${GITLAB_ADDRESS:http://localhost:8081/uboard-gitlab}
