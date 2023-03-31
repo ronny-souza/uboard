@@ -1,6 +1,7 @@
 package br.com.uboard.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -163,8 +164,7 @@ public class User implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

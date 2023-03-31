@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.uboard.exceptions.SynchronizeUserException;
 import br.com.uboard.exceptions.UserAlreadyExistsException;
 import br.com.uboard.model.User;
 import br.com.uboard.model.transport.CredentialsDTO;
@@ -37,14 +38,14 @@ public class UserService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public UserDTO synchronizeUser(CredentialsDTO credentialsDTO) throws Exception {
+	public UserDTO synchronizeUser(CredentialsDTO credentialsDTO) throws SynchronizeUserException {
 		try {
 			String url = new StringBuilder().append(this.address).append("/user/sync").toString();
 			ResponseEntity<UserDTO> response = this.webClient.post(url, UserDTO.class, credentialsDTO);
 
 			return response.getBody();
 		} catch (Exception e) {
-			throw new Exception(e.getMessage(), e);
+			throw new SynchronizeUserException(e.getMessage(), e);
 		}
 	}
 
@@ -60,7 +61,6 @@ public class UserService {
 //		TODO Send confirmation account by e-mail service
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	private void userAlreadyExists(String email) throws UserAlreadyExistsException {
 		Optional<User> optionalUser = this.userRepository.findByEmail(email);
 
