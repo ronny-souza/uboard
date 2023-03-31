@@ -18,10 +18,6 @@ public class CredentialsDTO implements Serializable {
 
 	private Boolean removable;
 
-	public CredentialsDTO() {
-
-	}
-
 	public String getAddress() {
 		return address;
 	}
