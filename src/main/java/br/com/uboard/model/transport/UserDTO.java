@@ -32,9 +32,11 @@ public class UserDTO implements Serializable {
 	@NotBlank(message = "Gitlab token must be provided")
 	private String token;
 
-	private String imageUrl;
+	private String avatarUrl;
 
 	private String state;
+
+	private String createdAt;
 
 	public UserDTO() {
 
@@ -46,8 +48,7 @@ public class UserDTO implements Serializable {
 		this.username = user.getUsername();
 		this.email = user.getEmail();
 		this.address = user.getAddress();
-		this.token = user.getToken();
-		this.imageUrl = user.getImageUrl();
+		this.avatarUrl = user.getAvatarUrl();
 		this.state = user.getState();
 	}
 
@@ -115,12 +116,12 @@ public class UserDTO implements Serializable {
 		this.token = token;
 	}
 
-	public String getImageUrl() {
-		return imageUrl;
+	public String getAvatarUrl() {
+		return avatarUrl;
 	}
 
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 	public String getState() {
@@ -129,5 +130,13 @@ public class UserDTO implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public String getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
 	}
 }
