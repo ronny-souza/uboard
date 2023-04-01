@@ -1,5 +1,7 @@
 package br.com.uboard.services;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -11,11 +13,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.uboard.RandomUtils;
 import br.com.uboard.exceptions.SynchronizeUserException;
 import br.com.uboard.exceptions.UserAlreadyExistsException;
 import br.com.uboard.model.User;
+import br.com.uboard.model.enums.MailTypeEnum;
 import br.com.uboard.model.transport.CredentialsDTO;
+import br.com.uboard.model.transport.MailDTO;
 import br.com.uboard.model.transport.UserDTO;
+import br.com.uboard.rabbitmq.MessageService;
+import br.com.uboard.rabbitmq.RabbitQueues;
 import br.com.uboard.repository.UserRepository;
 
 @Service
@@ -32,10 +39,13 @@ public class UserService {
 
 	private PasswordEncoder passwordEncoder;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	private MessageService messageService;
+
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MessageService messageService) {
 		this.webClient = new WebClientRest();
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.messageService = messageService;
 	}
 
 	public UserDTO synchronizeUser(CredentialsDTO credentialsDTO) throws SynchronizeUserException {
@@ -56,9 +66,23 @@ public class UserService {
 		User user = new User(userDTO);
 		user.setPassword(this.passwordEncoder.encode(userDTO.getPassword()));
 		this.userRepository.save(user);
-		LOGGER.debug("User registered successfully on database...");
+		LOGGER.debug("User registered successfully on database. Sending account confirmation e-mail...");
 
-//		TODO Send confirmation account by e-mail service
+		this.sendAccountConfirmationCodeByEmail(userDTO);
+	}
+
+	private void sendAccountConfirmationCodeByEmail(UserDTO userDTO) {
+		MailDTO mailDTO = new MailDTO();
+		mailDTO.setTo(userDTO.getEmail());
+		mailDTO.setMailType(MailTypeEnum.CONFIRM_ACCOUNT);
+		mailDTO.setSubject("Confirmação de Conta");
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("username", userDTO.getName());
+		properties.put("confirmationCode", RandomUtils.getInstance().generateRandomCode());
+		mailDTO.setProperties(properties);
+
+		this.messageService.enqueue(RabbitQueues.SEND_MAIL, mailDTO);
+
 	}
 
 	private void userAlreadyExists(String email) throws UserAlreadyExistsException {

@@ -26,6 +26,9 @@ public class User implements UserDetails {
 	@Column(nullable = false, unique = true)
 	private String uboardIdentifier;
 
+	@Column(nullable = false, unique = true)
+	private Long gitlabIdentifier;
+
 	@Column(nullable = false)
 	private String name;
 
@@ -48,7 +51,7 @@ public class User implements UserDetails {
 	private String token;
 
 	@Column(nullable = true)
-	private String imageUrl;
+	private String avatarUrl;
 
 	@Column(nullable = true)
 	private String state;
@@ -62,11 +65,12 @@ public class User implements UserDetails {
 		this.name = userDTO.getName();
 		this.username = userDTO.getUsername();
 		this.email = userDTO.getEmail();
+		this.gitlabIdentifier = userDTO.getId();
 //		TODO Default is false, and activate user by e-mail in future feature
 		this.enabled = true;
 		this.address = userDTO.getAddress();
 		this.token = userDTO.getToken();
-		this.imageUrl = userDTO.getImageUrl();
+		this.avatarUrl = userDTO.getAvatarUrl();
 		this.state = userDTO.getState();
 
 	}
@@ -85,6 +89,14 @@ public class User implements UserDetails {
 
 	public void setUboardIdentifier(String uboardIdentifier) {
 		this.uboardIdentifier = uboardIdentifier;
+	}
+
+	public Long getGitlabIdentifier() {
+		return gitlabIdentifier;
+	}
+
+	public void setGitlabIdentifier(Long gitlabIdentifier) {
+		this.gitlabIdentifier = gitlabIdentifier;
 	}
 
 	public String getName() {
@@ -119,12 +131,12 @@ public class User implements UserDetails {
 		this.token = token;
 	}
 
-	public String getImageUrl() {
-		return imageUrl;
+	public String getAvatarUrl() {
+		return avatarUrl;
 	}
 
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 	public String getState() {

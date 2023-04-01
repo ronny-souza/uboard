@@ -18,10 +18,11 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        dialect: org.hibernate.dialect.MySQLDialect
       javax:
         persistence:
           validation:
             mode: none
+
 
 gitlab-provider: ${GITLAB_ADDRESS:http://localhost:8081/uboard-gitlab}
