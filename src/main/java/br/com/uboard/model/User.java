@@ -23,10 +23,10 @@ public class User implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true)
+	@Column(name = "uboardIdentifier", nullable = false, unique = true)
 	private String uboardIdentifier;
 
-	@Column(nullable = false, unique = true)
+	@Column(name = "gitlabIdentifier", nullable = false, unique = true)
 	private Long gitlabIdentifier;
 
 	@Column(nullable = false)
@@ -50,11 +50,8 @@ public class User implements UserDetails {
 	@Column(nullable = false)
 	private String token;
 
-	@Column(nullable = true)
+	@Column(name = "avatarUrl", nullable = true)
 	private String avatarUrl;
-
-	@Column(nullable = true)
-	private String state;
 
 	public User() {
 
@@ -66,13 +63,10 @@ public class User implements UserDetails {
 		this.username = userDTO.getUsername();
 		this.email = userDTO.getEmail();
 		this.gitlabIdentifier = userDTO.getId();
-//		TODO Default is false, and activate user by e-mail in future feature
-		this.enabled = true;
+		this.enabled = false;
 		this.address = userDTO.getAddress();
 		this.token = userDTO.getToken();
 		this.avatarUrl = userDTO.getAvatarUrl();
-		this.state = userDTO.getState();
-
 	}
 
 	public Long getId() {
@@ -137,14 +131,6 @@ public class User implements UserDetails {
 
 	public void setAvatarUrl(String avatarUrl) {
 		this.avatarUrl = avatarUrl;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
 	}
 
 	@Override

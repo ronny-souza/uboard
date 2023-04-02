@@ -34,8 +34,6 @@ public class UserDTO implements Serializable {
 
 	private String avatarUrl;
 
-	private String state;
-
 	private String createdAt;
 
 	public UserDTO() {
@@ -49,7 +47,6 @@ public class UserDTO implements Serializable {
 		this.email = user.getEmail();
 		this.address = user.getAddress();
 		this.avatarUrl = user.getAvatarUrl();
-		this.state = user.getState();
 	}
 
 	public String getUboardIdentifier() {
@@ -122,14 +119,6 @@ public class UserDTO implements Serializable {
 
 	public void setAvatarUrl(String avatarUrl) {
 		this.avatarUrl = avatarUrl;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
 	}
 
 	public String getCreatedAt() {
