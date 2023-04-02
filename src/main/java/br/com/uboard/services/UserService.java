@@ -94,7 +94,12 @@ public class UserService {
 		user.setEnabled(true);
 		this.accountConfirmationRepository.delete(accountConfirmation);
 
-//		TODO Publish user Gitlab credentials on RabbitMQ credentials queue
+		CredentialsDTO credentialsDTO = new CredentialsDTO();
+		credentialsDTO.setAddress(user.getAddress());
+		credentialsDTO.setRemovable(false);
+		credentialsDTO.setToken(user.getToken());
+		credentialsDTO.setUserUUID(user.getGitlabIdentifier());
+		this.messageService.enqueue(RabbitQueues.GITLAB_USER_CREDENTIALS, credentialsDTO);
 	}
 
 	private void sendAccountConfirmationCodeByEmail(User user) {
