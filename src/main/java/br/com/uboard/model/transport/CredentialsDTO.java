@@ -14,9 +14,9 @@ public class CredentialsDTO implements Serializable {
 	@NotBlank(message = "Gitlab user token must be provided")
 	private String token;
 
-	private String userUUID;
+	private Long userUUID;
 
-	private Boolean removable;
+	private boolean removable;
 
 	public String getAddress() {
 		return address;
@@ -34,19 +34,19 @@ public class CredentialsDTO implements Serializable {
 		this.token = token;
 	}
 
-	public String getUserUUID() {
+	public Long getUserUUID() {
 		return userUUID;
 	}
 
-	public void setUserUUID(String userUUID) {
+	public void setUserUUID(Long userUUID) {
 		this.userUUID = userUUID;
 	}
 
-	public Boolean getRemovable() {
+	public boolean getRemovable() {
 		return removable;
 	}
 
-	public void setRemovable(Boolean removable) {
+	public void setRemovable(boolean removable) {
 		this.removable = removable;
 	}
 
