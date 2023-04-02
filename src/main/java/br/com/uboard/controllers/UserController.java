@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.uboard.exceptions.ConfirmationCodeExpiredException;
+import br.com.uboard.exceptions.ConfirmationCodeNotFoundException;
 import br.com.uboard.exceptions.SynchronizeUserException;
 import br.com.uboard.exceptions.UserAlreadyExistsException;
+import br.com.uboard.model.transport.AccountConfirmationDTO;
 import br.com.uboard.model.transport.CredentialsDTO;
 import br.com.uboard.model.transport.UserDTO;
 import br.com.uboard.services.UserService;
@@ -34,5 +37,12 @@ public class UserController {
 			throws SynchronizeUserException {
 		UserDTO response = this.userService.synchronizeUser(credentialsDTO);
 		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/activate")
+	public ResponseEntity<UserDTO> activateUser(@RequestBody AccountConfirmationDTO accountConfirmationDTO)
+			throws ConfirmationCodeNotFoundException, ConfirmationCodeExpiredException {
+		this.userService.activateUser(accountConfirmationDTO);
+		return ResponseEntity.ok().build();
 	}
 }

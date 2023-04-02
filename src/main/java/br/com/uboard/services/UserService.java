@@ -14,15 +14,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.uboard.RandomUtils;
+import br.com.uboard.exceptions.ConfirmationCodeExpiredException;
+import br.com.uboard.exceptions.ConfirmationCodeNotFoundException;
 import br.com.uboard.exceptions.SynchronizeUserException;
 import br.com.uboard.exceptions.UserAlreadyExistsException;
+import br.com.uboard.model.AccountConfirmation;
 import br.com.uboard.model.User;
+import br.com.uboard.model.enums.ConfirmationAccountTypeEnum;
 import br.com.uboard.model.enums.MailTypeEnum;
+import br.com.uboard.model.transport.AccountConfirmationDTO;
 import br.com.uboard.model.transport.CredentialsDTO;
 import br.com.uboard.model.transport.MailDTO;
 import br.com.uboard.model.transport.UserDTO;
 import br.com.uboard.rabbitmq.MessageService;
 import br.com.uboard.rabbitmq.RabbitQueues;
+import br.com.uboard.repository.AccountConfirmationRepository;
 import br.com.uboard.repository.UserRepository;
 
 @Service
@@ -37,15 +43,23 @@ public class UserService {
 
 	private UserRepository userRepository;
 
+	private AccountConfirmationRepository accountConfirmationRepository;
+
 	private PasswordEncoder passwordEncoder;
 
 	private MessageService messageService;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MessageService messageService) {
+	private AccountConfirmationService accountConfirmationService;
+
+	public UserService(UserRepository userRepository, AccountConfirmationRepository accountConfirmationRepository,
+			PasswordEncoder passwordEncoder, MessageService messageService,
+			AccountConfirmationService accountConfirmationService) {
 		this.webClient = new WebClientRest();
 		this.userRepository = userRepository;
+		this.accountConfirmationRepository = accountConfirmationRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.messageService = messageService;
+		this.accountConfirmationService = accountConfirmationService;
 	}
 
 	public UserDTO synchronizeUser(CredentialsDTO credentialsDTO) throws SynchronizeUserException {
@@ -68,17 +82,37 @@ public class UserService {
 		this.userRepository.save(user);
 		LOGGER.debug("User registered successfully on database. Sending account confirmation e-mail...");
 
-		this.sendAccountConfirmationCodeByEmail(userDTO);
+		this.sendAccountConfirmationCodeByEmail(user);
 	}
 
-	private void sendAccountConfirmationCodeByEmail(UserDTO userDTO) {
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+	public void activateUser(AccountConfirmationDTO accountConfirmationDTO)
+			throws ConfirmationCodeNotFoundException, ConfirmationCodeExpiredException {
+		AccountConfirmation accountConfirmation = this.accountConfirmationService.validate(accountConfirmationDTO);
+
+		User user = accountConfirmation.getUser();
+		user.setEnabled(true);
+		this.accountConfirmationRepository.delete(accountConfirmation);
+
+//		TODO Publish user Gitlab credentials on RabbitMQ credentials queue
+	}
+
+	private void sendAccountConfirmationCodeByEmail(User user) {
+		String confirmationCode = RandomUtils.getInstance().generateRandomCode();
+
+		AccountConfirmation accountConfirmation = new AccountConfirmation();
+		accountConfirmation.setCode(confirmationCode);
+		accountConfirmation.setType(ConfirmationAccountTypeEnum.ACTIVATE_USER);
+		accountConfirmation.setUser(user);
+		this.accountConfirmationRepository.save(accountConfirmation);
+
 		MailDTO mailDTO = new MailDTO();
-		mailDTO.setTo(userDTO.getEmail());
+		mailDTO.setTo(user.getEmail());
 		mailDTO.setMailType(MailTypeEnum.CONFIRM_ACCOUNT);
 		mailDTO.setSubject("Confirmação de Conta");
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("username", userDTO.getName());
-		properties.put("confirmationCode", RandomUtils.getInstance().generateRandomCode());
+		properties.put("username", user.getName());
+		properties.put("confirmationCode", confirmationCode);
 		mailDTO.setProperties(properties);
 
 		this.messageService.enqueue(RabbitQueues.SEND_MAIL, mailDTO);

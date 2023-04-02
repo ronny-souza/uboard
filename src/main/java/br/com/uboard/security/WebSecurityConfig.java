@@ -14,7 +14,8 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.httpBasic().and().authorizeHttpRequests().requestMatchers(HttpMethod.POST, "/user/sync")
-				.permitAll().requestMatchers(HttpMethod.POST, "/user").permitAll().anyRequest().authenticated().and()
+				.permitAll().requestMatchers(HttpMethod.POST, "/user").permitAll()
+				.requestMatchers(HttpMethod.POST, "/user/activate").permitAll().anyRequest().authenticated().and()
 				.csrf().disable();
 		return httpSecurity.build();
 	}
