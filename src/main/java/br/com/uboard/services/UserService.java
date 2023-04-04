@@ -1,6 +1,8 @@
 package br.com.uboard.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ import br.com.uboard.exceptions.ConfirmationCodeExpiredException;
 import br.com.uboard.exceptions.ConfirmationCodeNotFoundException;
 import br.com.uboard.exceptions.SynchronizeUserException;
 import br.com.uboard.exceptions.UserAlreadyExistsException;
+import br.com.uboard.exceptions.UserNotFoundException;
 import br.com.uboard.model.AccountConfirmation;
 import br.com.uboard.model.User;
 import br.com.uboard.model.enums.ConfirmationAccountTypeEnum;
@@ -62,6 +65,26 @@ public class UserService {
 		this.accountConfirmationService = accountConfirmationService;
 	}
 
+	public User findByUboardIdentifier(String uboardIdentifier) throws UserNotFoundException {
+		Optional<User> optionalUser = this.userRepository.findByUboardIdentifierAndEnabledTrue(uboardIdentifier);
+
+		if (optionalUser.isEmpty()) {
+			throw new UserNotFoundException(String.format("User with identifier: %s is not found", uboardIdentifier));
+		}
+
+		return optionalUser.get();
+	}
+
+	public User findByGitlabIdentifier(Long gitlabIdentifier) throws UserNotFoundException {
+		Optional<User> optionalUser = this.userRepository.findByGitlabIdentifierAndEnabledTrue(gitlabIdentifier);
+
+		if (optionalUser.isEmpty()) {
+			throw new UserNotFoundException(String.format("User with identifier: %s is not found", gitlabIdentifier));
+		}
+
+		return optionalUser.get();
+	}
+
 	public UserDTO synchronizeUser(CredentialsDTO credentialsDTO) throws SynchronizeUserException {
 		try {
 			String url = new StringBuilder().append(this.address).append("/user/sync").toString();
@@ -71,6 +94,16 @@ public class UserService {
 		} catch (Exception e) {
 			throw new SynchronizeUserException(e.getMessage(), e);
 		}
+	}
+
+	public List<CredentialsDTO> listCredentialsByUserEnabled() {
+		List<User> usersWithCredentials = this.userRepository.findByEnabledTrue();
+
+		if (usersWithCredentials == null) {
+			return new ArrayList<>();
+		}
+
+		return usersWithCredentials.stream().map(CredentialsDTO::new).toList();
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)

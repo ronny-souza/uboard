@@ -2,6 +2,7 @@ package br.com.uboard.model.transport;
 
 import java.io.Serializable;
 
+import br.com.uboard.model.User;
 import jakarta.validation.constraints.NotBlank;
 
 public class CredentialsDTO implements Serializable {
@@ -17,6 +18,17 @@ public class CredentialsDTO implements Serializable {
 	private Long userUUID;
 
 	private boolean removable;
+
+	public CredentialsDTO() {
+
+	}
+
+	public CredentialsDTO(User user) {
+		this.address = user.getAddress();
+		this.token = user.getToken();
+		this.userUUID = user.getGitlabIdentifier();
+		this.removable = false;
+	}
 
 	public String getAddress() {
 		return address;
