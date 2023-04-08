@@ -24,6 +24,9 @@ public class Project {
 	@Column(name = "gitlabIdentifier", nullable = false, unique = true)
 	private Long gitlabIdentifier;
 
+	@Column(name = "autoSync", columnDefinition = "tinyint DEFAULT 0")
+	private boolean autoSync;
+
 	@Column(nullable = false)
 	private String name;
 
@@ -41,6 +44,7 @@ public class Project {
 	public Project(ProjectDTO projectDTO, User user) {
 		this.uboardIdentifier = UUID.randomUUID().toString();
 		this.gitlabIdentifier = projectDTO.getId();
+		this.autoSync = false;
 		this.name = projectDTO.getName();
 		this.avatarUrl = projectDTO.getAvatarUrl();
 		this.user = user;
@@ -68,6 +72,14 @@ public class Project {
 
 	public void setGitlabIdentifier(Long gitlabIdentifier) {
 		this.gitlabIdentifier = gitlabIdentifier;
+	}
+
+	public boolean isAutoSync() {
+		return autoSync;
+	}
+
+	public void setAutoSync(boolean autoSync) {
+		this.autoSync = autoSync;
 	}
 
 	public String getName() {
