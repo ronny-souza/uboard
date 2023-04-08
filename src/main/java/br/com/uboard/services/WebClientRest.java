@@ -31,6 +31,18 @@ public class WebClientRest {
 		return new HttpEntity<>(null, httpHeaders);
 	}
 
+	public HttpEntity<Object> getDefaultHttpEntity(Long userUUID) {
+		HttpHeaders httpHeaders = this.getHeaders(userUUID);
+		return new HttpEntity<>(null, httpHeaders);
+	}
+
+	public HttpHeaders getHeaders(Long userUUID) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("userUUID", String.valueOf(userUUID));
+		headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+		return headers;
+	}
+
 	private HttpHeaders getDefaultHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -59,6 +71,11 @@ public class WebClientRest {
 	}
 
 	public <T> ResponseEntity<T> get(String uri, HttpEntity<Object> httpEntity, Class<T> responseType) {
+		return this.restTemplate.exchange(uri, HttpMethod.GET, httpEntity, responseType);
+	}
+
+	public <T> ResponseEntity<T> get(String uri, HttpEntity<Object> httpEntity,
+			ParameterizedTypeReference<T> responseType) {
 		return this.restTemplate.exchange(uri, HttpMethod.GET, httpEntity, responseType);
 	}
 

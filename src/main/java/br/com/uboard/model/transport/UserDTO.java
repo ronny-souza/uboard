@@ -42,6 +42,7 @@ public class UserDTO implements Serializable {
 
 	public UserDTO(User user) {
 		this.uboardIdentifier = user.getUboardIdentifier();
+		this.id = user.getGitlabIdentifier();
 		this.name = user.getName();
 		this.username = user.getUsername();
 		this.email = user.getEmail();

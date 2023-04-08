@@ -10,6 +10,7 @@ public class ProjectDTO implements Serializable {
 
 	private Long id;
 	private String uboardIdentifier;
+	private boolean autoSync;
 	private String name;
 	private String avatarUrl;
 
@@ -20,6 +21,7 @@ public class ProjectDTO implements Serializable {
 	public ProjectDTO(Project project) {
 		this.uboardIdentifier = project.getUboardIdentifier();
 		this.id = project.getGitlabIdentifier();
+		this.autoSync = project.isAutoSync();
 		this.name = project.getName();
 		this.avatarUrl = project.getAvatarUrl();
 	}
@@ -38,6 +40,14 @@ public class ProjectDTO implements Serializable {
 
 	public void setUboardIdentifier(String uboardIdentifier) {
 		this.uboardIdentifier = uboardIdentifier;
+	}
+
+	public boolean isAutoSync() {
+		return autoSync;
+	}
+
+	public void setAutoSync(boolean autoSync) {
+		this.autoSync = autoSync;
 	}
 
 	public String getName() {
