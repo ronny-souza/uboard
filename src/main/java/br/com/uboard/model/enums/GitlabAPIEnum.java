@@ -2,7 +2,8 @@ package br.com.uboard.model.enums;
 
 public enum GitlabAPIEnum {
 
-	PROJECT("/project");
+	PROJECT("/project"),
+	GROUP("/group");
 
 	private String path;
 

@@ -92,6 +92,7 @@ public class ProjectService {
 		return response.getBody();
 	}
 
+//	TODO Unused, for now
 	public void synchronizeProjects(SyncProjectDTO syncProjectDTO) {
 		try {
 			if (syncProjectDTO.getUserUUID() == null) {
