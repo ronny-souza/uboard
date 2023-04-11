@@ -1,17 +1,26 @@
 package br.com.uboard.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import br.com.uboard.exceptions.SynchronizeGroupsException;
 import br.com.uboard.exceptions.UserNotFoundException;
 import br.com.uboard.model.Grouping;
 import br.com.uboard.model.User;
+import br.com.uboard.model.enums.GitlabAPIEnum;
 import br.com.uboard.model.transport.GroupDTO;
 import br.com.uboard.model.transport.SyncGroupDTO;
+import br.com.uboard.model.transport.UserDTO;
 import br.com.uboard.repository.GroupingRepository;
 
 @Service
@@ -22,9 +31,65 @@ public class GroupService {
 	private GroupingRepository groupingRepository;
 	private UserService userService;
 
+	private WebClientRest webClient;
+
+	@Value("${gitlab-provider}")
+	private String address;
+
 	public GroupService(GroupingRepository groupingRepository, UserService userService) {
 		this.groupingRepository = groupingRepository;
 		this.userService = userService;
+		this.webClient = new WebClientRest();
+	}
+
+	public List<GroupDTO> fetchGroupsToSync(UserDTO userInSession)
+			throws SynchronizeGroupsException, UserNotFoundException {
+
+		User user = this.userService.findByUboardIdentifier(userInSession.getUboardIdentifier());
+
+		List<GroupDTO> groups = new ArrayList<>();
+		List<GroupDTO> newGroups = this.fetchGroups(userInSession);
+		List<Grouping> currentGroups = this.groupingRepository.findByUser(user);
+
+		for (GroupDTO newGroup : newGroups) {
+			Optional<Grouping> optionalGroup = currentGroups.stream()
+					.filter(currentGroup -> currentGroup.getGitlabIdentifier().equals(newGroup.getId())).findAny();
+
+			if (optionalGroup.isEmpty()) {
+				groups.add(newGroup);
+			}
+		}
+
+		return groups;
+	}
+
+	public void saveGroups(List<GroupDTO> groups, UserDTO userInSession) throws UserNotFoundException {
+		if (groups == null || groups.isEmpty()) {
+			return;
+		}
+
+		User user = this.userService.findByUboardIdentifier(userInSession.getUboardIdentifier());
+		List<Grouping> newGroups = groups.stream().map(groupDTO -> new Grouping(groupDTO, user)).toList();
+
+		for (Grouping newGroup : newGroups) {
+			this.groupingRepository.save(newGroup);
+		}
+	}
+
+	private List<GroupDTO> fetchGroups(UserDTO userInSession) throws SynchronizeGroupsException {
+		HttpEntity<Object> httpEntity = this.webClient.getDefaultHttpEntity(userInSession.getId());
+		String url = new StringBuilder().append(this.address).append(GitlabAPIEnum.GROUP.getPath()).append("/sync")
+				.toString();
+
+		ResponseEntity<List<GroupDTO>> response = this.webClient.get(url, httpEntity,
+				new ParameterizedTypeReference<List<GroupDTO>>() {
+				});
+
+		if (response.getStatusCode() != HttpStatus.OK) {
+			throw new SynchronizeGroupsException("Error on sync Gitlab Groups");
+		}
+
+		return response.getBody();
 	}
 
 	public void synchronizeGroups(SyncGroupDTO syncGroupDTO) {

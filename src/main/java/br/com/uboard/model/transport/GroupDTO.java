@@ -10,6 +10,7 @@ public class GroupDTO implements Serializable {
 
 	private Long id;
 	private String uboardIdentifier;
+	private boolean autoSync;
 	private String name;
 	private String avatarUrl;
 
@@ -20,6 +21,7 @@ public class GroupDTO implements Serializable {
 	public GroupDTO(Grouping group) {
 		this.id = group.getGitlabIdentifier();
 		this.uboardIdentifier = group.getUboardIdentifier();
+		this.autoSync = group.isAutoSync();
 		this.name = group.getName();
 		this.avatarUrl = group.getAvatarUrl();
 	}
@@ -38,6 +40,14 @@ public class GroupDTO implements Serializable {
 
 	public void setUboardIdentifier(String uboardIdentifier) {
 		this.uboardIdentifier = uboardIdentifier;
+	}
+
+	public boolean isAutoSync() {
+		return autoSync;
+	}
+
+	public void setAutoSync(boolean autoSync) {
+		this.autoSync = autoSync;
 	}
 
 	public String getName() {

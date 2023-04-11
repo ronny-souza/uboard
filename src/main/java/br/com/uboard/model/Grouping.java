@@ -24,6 +24,9 @@ public class Grouping {
 	@Column(name = "gitlabIdentifier", nullable = false, unique = true)
 	private Long gitlabIdentifier;
 
+	@Column(name = "autoSync", columnDefinition = "tinyint DEFAULT 0")
+	private boolean autoSync;
+
 	@Column(nullable = false)
 	private String name;
 
@@ -41,6 +44,7 @@ public class Grouping {
 	public Grouping(GroupDTO groupDTO, User user) {
 		this.uboardIdentifier = UUID.randomUUID().toString();
 		this.gitlabIdentifier = groupDTO.getId();
+		this.autoSync = false;
 		this.name = groupDTO.getName();
 		this.avatarUrl = groupDTO.getAvatarUrl();
 		this.user = user;
@@ -68,6 +72,14 @@ public class Grouping {
 
 	public void setGitlabIdentifier(Long gitlabIdentifier) {
 		this.gitlabIdentifier = gitlabIdentifier;
+	}
+
+	public boolean isAutoSync() {
+		return autoSync;
+	}
+
+	public void setAutoSync(boolean autoSync) {
+		this.autoSync = autoSync;
 	}
 
 	public String getName() {
