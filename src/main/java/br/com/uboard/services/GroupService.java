@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import br.com.uboard.exceptions.GroupNotFoundException;
 import br.com.uboard.exceptions.SynchronizeGroupsException;
 import br.com.uboard.exceptions.UserNotFoundException;
 import br.com.uboard.model.Grouping;
@@ -20,7 +21,10 @@ import br.com.uboard.model.User;
 import br.com.uboard.model.enums.GitlabAPIEnum;
 import br.com.uboard.model.transport.GroupDTO;
 import br.com.uboard.model.transport.SyncGroupDTO;
+import br.com.uboard.model.transport.SyncMilestoneDTO;
 import br.com.uboard.model.transport.UserDTO;
+import br.com.uboard.rabbitmq.MessageService;
+import br.com.uboard.rabbitmq.RabbitQueues;
 import br.com.uboard.repository.GroupingRepository;
 
 @Service
@@ -30,16 +34,28 @@ public class GroupService {
 
 	private GroupingRepository groupingRepository;
 	private UserService userService;
+	private MessageService messageService;
 
 	private WebClientRest webClient;
 
 	@Value("${gitlab-provider}")
 	private String address;
 
-	public GroupService(GroupingRepository groupingRepository, UserService userService) {
+	public GroupService(GroupingRepository groupingRepository, MessageService messageService, UserService userService) {
 		this.groupingRepository = groupingRepository;
 		this.userService = userService;
+		this.messageService = messageService;
 		this.webClient = new WebClientRest();
+	}
+
+	public Grouping findByGitlabIdentifier(Long gitlabIdentifier) throws GroupNotFoundException {
+		Optional<Grouping> optionalGroup = this.groupingRepository.findByGitlabIdentifier(gitlabIdentifier);
+
+		if (optionalGroup.isEmpty()) {
+			throw new GroupNotFoundException(String.format("Group %d not found", gitlabIdentifier));
+		}
+
+		return optionalGroup.get();
 	}
 
 	public List<GroupDTO> fetchGroupsToSync(UserDTO userInSession)
@@ -69,10 +85,13 @@ public class GroupService {
 		}
 
 		User user = this.userService.findByUboardIdentifier(userInSession.getUboardIdentifier());
-		List<Grouping> newGroups = groups.stream().map(groupDTO -> new Grouping(groupDTO, user)).toList();
 
-		for (Grouping newGroup : newGroups) {
-			this.groupingRepository.save(newGroup);
+		for (GroupDTO newGroupDTO : groups) {
+			Grouping grouping = new Grouping(newGroupDTO, user);
+			this.groupingRepository.save(grouping);
+
+			SyncMilestoneDTO syncMilestoneDTO = new SyncMilestoneDTO(user.getGitlabIdentifier(), newGroupDTO.getId());
+			this.messageService.enqueue(RabbitQueues.GITLAB_REQUEST_SYNC_GROUP_MILESTONES, syncMilestoneDTO);
 		}
 	}
 

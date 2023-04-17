@@ -13,14 +13,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import br.com.uboard.exceptions.ProjectNotFoundException;
 import br.com.uboard.exceptions.SynchronizeProjectsException;
 import br.com.uboard.exceptions.UserNotFoundException;
 import br.com.uboard.model.Project;
 import br.com.uboard.model.User;
 import br.com.uboard.model.enums.GitlabAPIEnum;
 import br.com.uboard.model.transport.ProjectDTO;
+import br.com.uboard.model.transport.SyncMilestoneDTO;
 import br.com.uboard.model.transport.SyncProjectDTO;
 import br.com.uboard.model.transport.UserDTO;
+import br.com.uboard.rabbitmq.MessageService;
+import br.com.uboard.rabbitmq.RabbitQueues;
 import br.com.uboard.repository.ProjectRepository;
 
 @Service
@@ -30,15 +34,28 @@ public class ProjectService {
 
 	private ProjectRepository projectRepository;
 	private UserService userService;
+	private MessageService messageService;
+
 	private WebClientRest webClient;
 
 	@Value("${gitlab-provider}")
 	private String address;
 
-	public ProjectService(ProjectRepository projectRepository, UserService userService) {
+	public ProjectService(ProjectRepository projectRepository, UserService userService, MessageService messageService) {
 		this.projectRepository = projectRepository;
 		this.userService = userService;
+		this.messageService = messageService;
 		this.webClient = new WebClientRest();
+	}
+
+	public Project findByGitlabIdentifier(Long gitlabIdentifier) throws ProjectNotFoundException {
+		Optional<Project> optionalProject = this.projectRepository.findByGitlabIdentifier(gitlabIdentifier);
+
+		if (optionalProject.isEmpty()) {
+			throw new ProjectNotFoundException(String.format("Project %d not found", gitlabIdentifier));
+		}
+
+		return optionalProject.get();
 	}
 
 	public List<ProjectDTO> fetchProjectsToSync(UserDTO userInSession)
@@ -73,6 +90,10 @@ public class ProjectService {
 
 		for (Project newProject : newProjects) {
 			this.projectRepository.save(newProject);
+
+			SyncMilestoneDTO syncMilestoneDTO = new SyncMilestoneDTO(user.getGitlabIdentifier(),
+					newProject.getGitlabIdentifier());
+			this.messageService.enqueue(RabbitQueues.GITLAB_REQUEST_SYNC_PROJECT_MILESTONES, syncMilestoneDTO);
 		}
 	}
 
