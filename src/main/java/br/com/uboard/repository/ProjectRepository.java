@@ -1,6 +1,7 @@
 package br.com.uboard.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ import br.com.uboard.model.User;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
 	public List<Project> findByUser(User user);
+
+	public Optional<Project> findByGitlabIdentifier(Long gitlabIdentifier);
 }

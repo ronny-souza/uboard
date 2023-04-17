@@ -1,5 +1,6 @@
 package br.com.uboard.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import br.com.uboard.model.transport.GroupDTO;
@@ -28,6 +29,9 @@ public class Grouping {
 	private boolean autoSync;
 
 	@Column(nullable = false)
+	private LocalDateTime lastSync;
+
+	@Column(nullable = false)
 	private String name;
 
 	@Column(name = "avatarUrl", nullable = true)
@@ -45,6 +49,7 @@ public class Grouping {
 		this.uboardIdentifier = UUID.randomUUID().toString();
 		this.gitlabIdentifier = groupDTO.getId();
 		this.autoSync = false;
+		this.lastSync = LocalDateTime.now();
 		this.name = groupDTO.getName();
 		this.avatarUrl = groupDTO.getAvatarUrl();
 		this.user = user;
@@ -80,6 +85,14 @@ public class Grouping {
 
 	public void setAutoSync(boolean autoSync) {
 		this.autoSync = autoSync;
+	}
+
+	public LocalDateTime getLastSync() {
+		return lastSync;
+	}
+
+	public void setLastSync(LocalDateTime lastSync) {
+		this.lastSync = lastSync;
 	}
 
 	public String getName() {
