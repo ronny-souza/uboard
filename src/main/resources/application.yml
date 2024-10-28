@@ -1,0 +1,24 @@
+server:
+  port: ${UBOARD_APPLICATION_PORT:8099}
+  servlet:
+    context-path: /uboard
+
+spring:
+  datasource:
+    url: ${UBOARD_DATABASE_URL:jdbc:mariadb://localhost:3306/uboard}
+    username: ${UBOARD_DATABASE_USERNAME:root}
+    password: ${UBOARD_DATABASE_PASSWORD}
+  jpa:
+    show-sql: ${UBOARD_DATABASE_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: ${UBOARD_DATABASE_DDL_AUTO:update}
+    properties:
+      hibernate:
+        format_sql: ${UBOARD_DATABASE_FORMAT_SQL:false}
+
+external:
+  gitlab:
+    api:
+      url: ${GITLAB_API_URL}
+      token: ${GITLAB_API_TOKEN}
+
