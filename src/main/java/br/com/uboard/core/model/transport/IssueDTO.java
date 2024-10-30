@@ -1,6 +1,15 @@
 package br.com.uboard.core.model.transport;
 
-public record IssueDTO(Long id,
-                       Long iid,
-                       String title) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record IssueDTO(
+        Long id,
+
+        Long iid,
+
+        @JsonProperty("project_id")
+        Long projectId,
+
+        String title
+) {
 }

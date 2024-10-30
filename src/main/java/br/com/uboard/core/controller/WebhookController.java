@@ -1,7 +1,9 @@
 package br.com.uboard.core.controller;
 
 import br.com.uboard.core.model.operations.ReceiveMergeRequestEventForm;
-import br.com.uboard.core.service.CreateReleaseNoteItemService;
+import br.com.uboard.core.model.operations.ReceiveTagEventForm;
+import br.com.uboard.core.service.CreateIssueService;
+import br.com.uboard.core.service.CreateTagReleaseNotesService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +27,24 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class WebhookController {
 
-    private final CreateReleaseNoteItemService createReleaseNoteItemService;
+    private final CreateIssueService createIssueService;
+    private final CreateTagReleaseNotesService createTagReleaseNotesService;
 
-    public WebhookController(CreateReleaseNoteItemService createReleaseNoteItemService) {
-        this.createReleaseNoteItemService = createReleaseNoteItemService;
+    public WebhookController(CreateIssueService createIssueService,
+                             CreateTagReleaseNotesService createTagReleaseNotesService) {
+        this.createIssueService = createIssueService;
+        this.createTagReleaseNotesService = createTagReleaseNotesService;
     }
 
     @PostMapping("/merge-request")
     public ResponseEntity<Void> receiveMergeRequestsEvent(@RequestBody @Valid ReceiveMergeRequestEventForm payload) {
-        this.createReleaseNoteItemService.create(payload);
-        return ResponseEntity.noContent().build();
+        this.createIssueService.create(payload);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/tag")
+    public ResponseEntity<Void> receiveTagEvent(@RequestBody @Valid ReceiveTagEventForm payload) {
+        this.createTagReleaseNotesService.create(payload);
+        return ResponseEntity.ok().build();
     }
 }

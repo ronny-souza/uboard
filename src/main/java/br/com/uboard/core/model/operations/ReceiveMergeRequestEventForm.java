@@ -15,12 +15,14 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "Representation of the payload received from the webhook for Gitlab merge request events")
 public record ReceiveMergeRequestEventForm(
         @JsonProperty("object_attributes")
-        @NotNull @Valid
+        @NotNull
+        @Valid
         @Schema(description = "Merge request attributes")
         MergeRequestObjectAttributesForm objectAttributes,
 
-        @NotNull @Valid
+        @NotNull
+        @Valid
         @Schema(description = "Attributes of the project targeted by the merge request")
-        MergeRequestProjectForm project
+        GitlabEventProjectForm project
 ) {
 }

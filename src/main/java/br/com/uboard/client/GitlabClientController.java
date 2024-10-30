@@ -1,10 +1,13 @@
 package br.com.uboard.client;
 
+import br.com.uboard.core.model.operations.CreateGitlabTagReleaseForm;
 import br.com.uboard.core.model.transport.IssueDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
@@ -21,4 +24,9 @@ public interface GitlabClientController {
     ResponseEntity<IssueDTO> getSingleProjectIssue(@RequestHeader("Authorization") String authorization,
                                                    @PathVariable("projectId") String projectId,
                                                    @PathVariable("id") String id);
+
+    @PostMapping("/projects/{projectId}/releases")
+    ResponseEntity<Void> createTagRelease(@RequestHeader("Authorization") String authorization,
+                                          @PathVariable("projectId") String projectId,
+                                          @RequestBody CreateGitlabTagReleaseForm body);
 }

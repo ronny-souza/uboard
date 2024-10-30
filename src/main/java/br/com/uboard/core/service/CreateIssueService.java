@@ -1,14 +1,15 @@
 package br.com.uboard.core.service;
 
-import br.com.uboard.client.GitlabClientController;
+import br.com.uboard.core.model.Issue;
 import br.com.uboard.core.model.operations.ReceiveMergeRequestEventForm;
 import br.com.uboard.core.model.transport.IssueDTO;
+import br.com.uboard.core.repository.IssueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -21,31 +22,31 @@ import java.util.Set;
  */
 
 @Service
-public class CreateReleaseNoteItemService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateReleaseNoteItemService.class);
+public class CreateIssueService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateIssueService.class);
 
-    private final GitlabClientController gitlabClientController;
-    private final String token;
+    private final IssueRepository issueRepository;
+    private final GitlabService gitlabService;
 
-    public CreateReleaseNoteItemService(GitlabClientController gitlabClientController,
-                                        @Value("${external.gitlab.api.token}") String token) {
-        this.gitlabClientController = gitlabClientController;
-        this.token = token;
+    public CreateIssueService(IssueRepository issueRepository, GitlabService gitlabService) {
+        this.issueRepository = issueRepository;
+        this.gitlabService = gitlabService;
     }
 
+
+    @Transactional
     public void create(ReceiveMergeRequestEventForm payload) {
         Set<String> ids = payload.objectAttributes().getIssueIdentifiersFromDescription();
         LOGGER.debug("There are {} issues to release notes building...", ids.size());
 
-        String tokenAsBearer = String.format("Bearer %s", this.token);
+        Long projectId = payload.project().id();
+        Set<Issue> issues = new HashSet<>();
         for (String id : ids) {
-            ResponseEntity<IssueDTO> response = this.gitlabClientController.getSingleProjectIssue(
-                    tokenAsBearer, payload.project().id().toString(), id
-            );
-            if (response.getStatusCode().is2xxSuccessful() && !Objects.isNull(response.getBody())) {
-                IssueDTO issueDTO = response.getBody();
-                LOGGER.info(issueDTO.toString());
+            IssueDTO issueDTO = this.gitlabService.getSingleProjectIssue(projectId.toString(), id);
+            if (!Objects.isNull(issueDTO)) {
+                issues.add(new Issue(issueDTO));
             }
         }
+        this.issueRepository.saveAll(issues);
     }
 }
