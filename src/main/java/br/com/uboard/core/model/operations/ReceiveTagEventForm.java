@@ -30,7 +30,7 @@ public record ReceiveTagEventForm(
         GitlabEventProjectForm project
 ) {
 
-    public String getTagName() {
+    public String extractTagName() {
         String tagName = this.ref();
         int lastSlashIndex = tagName.lastIndexOf("/");
         if (lastSlashIndex != -1 && lastSlashIndex < tagName.length() - 1) {
