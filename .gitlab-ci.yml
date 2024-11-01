@@ -1,0 +1,51 @@
+stages:
+  - build
+  - docker_build
+  - docker_push
+
+cache:
+  paths:
+    - .m2/
+    
+variables:
+    IMAGE_TAG: docker.usto.re/ucloud:uboard-$CI_COMMIT_TAG
+    MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
+    SONAR_USER_HOME: "/cache/.sonar"
+    UBOARD_DATABASE_PASSWORD: $UBOARD_DATABASE_PASSWORD
+
+build:
+    stage: build
+    image: maven:3.9-eclipse-temurin-21
+    only:
+        - main
+    tags: 
+        - grunner
+    variables:
+        UBOARD_DATABASE_PASSWORD: $UBOARD_DATABASE_PASSWORD
+    script:
+        - mvn $MAVEN_OPTS clean verify sonar:sonar -Dsonar.java.source=21 -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_USTORE_HOST_URL -Dsonar.login=$SONAR_TOKEN
+
+docker_build:
+    image: maven:3.9-eclipse-temurin-21
+    stage: docker_build
+    tags: 
+        - grunner
+    only:
+        - tags
+    script:
+        - mvn versions:set -DnewVersion=$CI_COMMIT_TAG $MAVEN_OPTS spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=$IMAGE_TAG
+    artifacts:
+      paths:
+        - target
+docker_push:
+    image: docker:20.10.7
+    stage: docker_push
+    only:
+        - tags
+    tags: 
+        - grunner
+    before_script:
+        - mkdir -p $HOME/.docker  
+        - echo $NEXUS_USTORE_CONFIG_JSON > $HOME/.docker/config.json
+    script:
+        - docker push $IMAGE_TAG
