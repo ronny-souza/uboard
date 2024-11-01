@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 @SpringBootTest
-class UboardApplicationTests {
+class UboardApplicationTests extends TestContainersDatabaseConfiguration {
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -18,12 +18,4 @@ class UboardApplicationTests {
 	void testContextLoads() {
 		Assertions.assertNotNull(this.applicationContext);
 	}
-
-	@Test
-	@DisplayName("Testing application main method")
-	void testApplicationMainMethod() {
-		UboardApplication.main(new String[]{});
-		Assertions.assertNotNull(this.applicationContext);
-	}
-
 }

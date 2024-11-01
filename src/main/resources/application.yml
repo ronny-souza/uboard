@@ -5,7 +5,7 @@ server:
 
 spring:
   datasource:
-    url: ${UBOARD_DATABASE_URL:jdbc:mariadb://localhost:3306/uboard}
+    url: ${UBOARD_DATABASE_URL:jdbc:postgresql://localhost:5432/uboard}
     username: ${UBOARD_DATABASE_USERNAME:root}
     password: ${UBOARD_DATABASE_PASSWORD}
   jpa:
