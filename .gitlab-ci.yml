@@ -3,17 +3,18 @@ variables:
     MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
     SONAR_USER_HOME: "/cache/.sonar"
     UBOARD_DATABASE_URL: jdbc:mariadb://db:3306/test_db
-    UBOARD_DATABASE_USERNAME: test_user
-    UBOARD_DATABASE_PASSWORD: test_pass
+    UBOARD_DATABASE_USERNAME: root
+    UBOARD_DATABASE_PASSWORD: root
     MARIADB_ROOT_PASSWORD: root
     MARIADB_DATABASE: test_db
-    MARIADB_USER: test_user
-    MARIADB_PASSWORD: test_pass
+    MARIADB_USER: root
+    MARIADB_PASSWORD: root
 
 services:
     - name: mariadb:10.6
       alias: db
-        
+      volumes:
+        - ./src/main/resources/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
         
 stages:
   - build
