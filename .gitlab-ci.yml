@@ -10,10 +10,6 @@ variables:
     MARIADB_USER: root
     MARIADB_PASSWORD: root
     MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
-
-services:
-    - name: mariadb:10.6
-      alias: db
         
 stages:
   - build
@@ -31,12 +27,10 @@ build:
         - main
     tags: 
         - grunner
-    # variables:
-    #     UBOARD_DATABASE_URL: $UBOARD_DATABASE_URL
-    #     UBOARD_DATABASE_USERNAME: $UBOARD_DATABASE_USERNAME
-    #     UBOARD_DATABASE_PASSWORD: $UBOARD_DATABASE_PASSWORD
+    services:
+    - name: mariadb:10.6
+      alias: db
     script:
-        - sleep 30
         - mvn $MAVEN_OPTS clean verify sonar:sonar -Dsonar.java.source=21 -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_USTORE_HOST_URL -Dsonar.login=$SONAR_TOKEN
 
 docker_build:
