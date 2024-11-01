@@ -2,15 +2,15 @@ variables:
     IMAGE_TAG: docker.usto.re/ucloud:uboard-$CI_COMMIT_TAG
     MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
     SONAR_USER_HOME: "/cache/.sonar"
-    UBOARD_DATABASE_URL: jdbc:mariadb://mariadb:3306/test_db
+    UBOARD_DATABASE_URL: jdbc:mysql://mysql:3306/test_db
     UBOARD_DATABASE_USERNAME: root
     UBOARD_DATABASE_PASSWORD: root
-    MYSQL_HOST: mariadb
-    MARIADB_ROOT_PASSWORD: root
-    MARIADB_USER: root
-    MARIADB_PASSWORD: root
-    MARIADB_DATABASE: test_db
-    MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
+    MYSQL_HOST: mysql
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_USER: root
+    MYSQL_PASSWORD: root
+    MYSQL_DATABASE: test_db
+    MYSQL_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
         
 stages:
   - build
@@ -29,7 +29,7 @@ build:
     tags: 
         - grunner
     services:
-    - name: mariadb:10.6
+    - name: mysql:latest
     script:
         - mvn $MAVEN_OPTS clean verify sonar:sonar -Dsonar.java.source=21 -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_USTORE_HOST_URL -Dsonar.login=$SONAR_TOKEN
 
