@@ -1,3 +1,8 @@
+variables:
+    IMAGE_TAG: docker.usto.re/ucloud:uboard-$CI_COMMIT_TAG
+    MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
+    SONAR_USER_HOME: "/cache/.sonar"
+        
 stages:
   - build
   - docker_build
@@ -6,12 +11,6 @@ stages:
 cache:
   paths:
     - .m2/
-    
-variables:
-    IMAGE_TAG: docker.usto.re/ucloud:uboard-$CI_COMMIT_TAG
-    MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
-    SONAR_USER_HOME: "/cache/.sonar"
-    UBOARD_DATABASE_PASSWORD: $UBOARD_DATABASE_PASSWORD
 
 build:
     stage: build
@@ -20,8 +19,6 @@ build:
         - main
     tags: 
         - grunner
-    variables:
-        UBOARD_DATABASE_PASSWORD: $UBOARD_DATABASE_PASSWORD
     script:
         - mvn $MAVEN_OPTS clean verify sonar:sonar -Dsonar.java.source=21 -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_USTORE_HOST_URL -Dsonar.login=$SONAR_TOKEN
 
