@@ -16,7 +16,7 @@ build:
     stage: build
     image: maven:3.9-eclipse-temurin-21
     only:
-        - development
+        - main
     tags: 
         - grunner
     script:
