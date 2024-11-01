@@ -13,7 +13,6 @@ variables:
 services:
     - name: mariadb:10.6
       alias: db
-      environment:
         
         
 stages:
