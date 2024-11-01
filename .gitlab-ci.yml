@@ -1,11 +1,6 @@
 services:
     - name: mariadb:10.6
       alias: db
-      variables:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: test_db
-        MYSQL_USER: test_user
-        MYSQL_PASSWORD: test_password
 
 stages:
   - build
@@ -20,9 +15,13 @@ variables:
     IMAGE_TAG: docker.usto.re/ucloud:uboard-$CI_COMMIT_TAG
     MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
     SONAR_USER_HOME: "/cache/.sonar"
+    MARIADB_ROOT_PASSWORD: root
+    MARIADB_DATABASE: test_db
+    MARIADB_USER: test_user
+    MARIADB_PASSWORD: test_password
     UBOARD_DATABASE_URL: jdbc:mariadb://db:3306/test_db
-    UBOARD_DATABASE_USERNAME: test_user
-    UBOARD_DATABASE_PASSWORD: test_password
+    UBOARD_DATABASE_USERNAME: $MARIADB_USER
+    UBOARD_DATABASE_PASSWORD: $MARIADB_PASSWORD
 
 build:
     stage: build
