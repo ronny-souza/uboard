@@ -14,6 +14,7 @@ spring:
       ddl-auto: ${UBOARD_DATABASE_DDL_AUTO:update}
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: ${UBOARD_DATABASE_FORMAT_SQL:false}
 
 external:
