@@ -43,7 +43,7 @@ public class CreateIssueService {
         Set<Issue> issues = new HashSet<>();
         for (String id : ids) {
             IssueDTO issueDTO = this.gitlabService.getSingleProjectIssue(projectId.toString(), id);
-            if (!Objects.isNull(issueDTO)) {
+            if (!Objects.isNull(issueDTO) && !this.issueRepository.existsByIssueIdAndProjectId(issueDTO.iid(), issueDTO.projectId())) {
                 issues.add(new Issue(issueDTO));
             }
         }

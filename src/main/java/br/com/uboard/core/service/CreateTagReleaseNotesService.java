@@ -25,7 +25,7 @@ public class CreateTagReleaseNotesService {
 
     @Transactional
     public void create(ReceiveTagEventForm payload) {
-        String tagName = payload.getTagName();
+        String tagName = payload.extractTagName();
         Long projectId = payload.project().id();
 
         LOGGER.info("Starting to update the {} tag with the release notes", tagName);
